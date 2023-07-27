@@ -1,10 +1,10 @@
 import <std>;
 
-std.print("Hello world!\nthis is on a new line!!!!");
+std.print("Hello world!\nthis is on a new line!!!! :O");
 
 function setup(test) then
     pog = "WOOO";
     std.print(test);
 end
 
-setup("OHNO");
+setup("a poggers message");
