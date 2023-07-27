@@ -3,8 +3,8 @@ import <std>;
 std.print("Hello world!\nthis is on a new line!!!! :O");
 
 function setup(test) then
-    pog = "WOOO";
-    std.print(test);
+    pog = test;
+    std.print(pog);
 end
 
 setup("a poggers message");

@@ -89,6 +89,11 @@ public class LSInterpreter {
                 LSValue val = null;
 
                 val = LString.toValue(item.val);
+                if (val == null) {
+                    val = LVariable.toValue(item.val);
+                    if (val != null)
+                        val = val.toType(LVariable.class).getValueFromVariable(globals, locals);
+                }
 
                 if (val != null)
                     if (isGlobal)
