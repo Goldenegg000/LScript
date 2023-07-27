@@ -10,8 +10,8 @@ public class LString extends LSValue {
 
     private String Value;
 
-    public LString(String value) {
-        Value = value;
+    public LString(String string) {
+        Value = string;
     }
 
     @Override

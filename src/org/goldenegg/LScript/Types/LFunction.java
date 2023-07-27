@@ -52,8 +52,9 @@ public class LFunction extends LSValue {
             out.put(functionParameterNames.get(out.size()), lsVal);
         }
 
-        if (code != null)
+        if (code != null) {
             return self.runCode(code, out);
+        }
         if (altValue != null) {
             return altValue.apply(out);
         }

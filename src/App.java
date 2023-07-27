@@ -54,6 +54,7 @@ public class App {
         if (main != null)
             if (main.getType().getString() == "Function") {
                 var funcArgs = new ArrayList<LSValue>();
+                funcArgs.add(new LString("POGGERS"));
                 main.toType(LFunction.class).call(funcArgs, inter);
             }
 

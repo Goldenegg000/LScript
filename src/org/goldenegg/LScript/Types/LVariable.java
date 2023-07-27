@@ -22,6 +22,6 @@ public class LVariable extends LSValue {
     }
 
     public String toString() {
-        return "Variable";
+        return "Variable: " + name;
     }
 }

@@ -13,30 +13,31 @@ public class LSInterpreter {
     private HashMap<String, LSValue> globalVariables = new HashMap<>();
 
     public void compile(String code) throws LSError { // runs global code
-        runCode(code, globalVariables, new HashMap<>());
+        runCode(code, globalVariables, new HashMap<>(), true);
     }
 
     public void compile(String code, HashMap<String, LSValue> locals) throws LSError { // runs global code
-        runCode(code, globalVariables, locals);
+        runCode(code, globalVariables, locals, true);
     }
 
     public LSValue runCode(String code, HashMap<String, LSValue> locals) throws LSError { // runs function
-        return runCode(code, globalVariables, locals);
+        return runCode(code, globalVariables, locals, false);
     }
 
     public void compile(ArrayList<ASTNode> code) throws LSError { // runs global code
-        runCode(code, globalVariables, new HashMap<>());
+        runCode(code, globalVariables, new HashMap<>(), true);
     }
 
     public void compile(ArrayList<ASTNode> code, HashMap<String, LSValue> locals) throws LSError { // runs global code
-        runCode(code, globalVariables, locals);
+        runCode(code, globalVariables, locals, true);
     }
 
     public LSValue runCode(ArrayList<ASTNode> code, HashMap<String, LSValue> locals) throws LSError { // runs function
-        return runCode(code, globalVariables, locals);
+        return runCode(code, globalVariables, locals, false);
     }
 
-    private LSValue runCode(String code, HashMap<String, LSValue> globals, HashMap<String, LSValue> locals)
+    private LSValue runCode(String code, HashMap<String, LSValue> globals, HashMap<String, LSValue> locals,
+            boolean isGlobal)
             throws LSError {
         var tokens = LSTokenizer.tokenize(code);
         // var spacingCount = 0;
@@ -54,27 +55,33 @@ public class LSInterpreter {
         // System.out.println(astNode);
         // }
 
-        return runCode(tree, globals, locals);
+        return runCode(tree, globals, locals, isGlobal);
     }
 
-    private LSValue runCode(ArrayList<ASTNode> code, HashMap<String, LSValue> globals, HashMap<String, LSValue> locals)
+    private LSValue runCode(ArrayList<ASTNode> code, HashMap<String, LSValue> globals, HashMap<String, LSValue> locals,
+            boolean isGlobal)
             throws LSError {
         for (var itm : code) {
-            // System.out.println(itm.toString());
             if (itm instanceof LSParser.Import) {
                 var item = itm.castToType(LSParser.Import.class);
 
                 var val = getImport(item.name);
                 if (val == null)
                     throw new ImportNotFoundException();
-                globals.put(item.name, val);
+                if (isGlobal)
+                    globals.put(item.name, val);
+                else
+                    locals.put(item.name, val);
             }
 
             else if (itm instanceof LSParser.CreateFunction) {
                 var item = itm.castToType(LSParser.CreateFunction.class);
 
                 var val = new LFunction(item.code, item.args);
-                globals.put(item.name, val);
+                if (isGlobal)
+                    globals.put(item.name, val);
+                else
+                    locals.put(item.name, val);
             }
 
             else if (itm instanceof LSParser.setVariable) {
@@ -84,7 +91,10 @@ public class LSInterpreter {
                 val = LString.toValue(item.val);
 
                 if (val != null)
-                    globals.put(item.name, val);
+                    if (isGlobal)
+                        globals.put(item.name, val);
+                    else
+                        locals.put(item.name, val);
                 else
                     throw new LSErrors.InvalidEndOfStatementException("could not get the value from: " + item.val);
             }
@@ -104,12 +114,11 @@ public class LSInterpreter {
 
                 for (int i = 1; i < thing.length; i++) {
                     val = val.children.get(thing[i]);
+                    if (val == null)
+                        throw new VariableNotFound(item.name + " : " + thing[i]);
                 }
 
-                if (val == null)
-                    throw new VariableNotFound(item.name);
-
-                var valuedArgs = item.args;
+                var valuedArgs = new ArrayList<>(item.args); // added Arraylist to copy it before modifying it!!!!
 
                 for (int i = 0; i < valuedArgs.size(); i++) {
                     if (valuedArgs.get(i) instanceof LVariable) {
@@ -118,7 +127,7 @@ public class LSInterpreter {
                     }
                 }
 
-                val.call(valuedArgs, this);
+                val.toType(LFunction.class).call(valuedArgs, this);
             }
 
             else {
