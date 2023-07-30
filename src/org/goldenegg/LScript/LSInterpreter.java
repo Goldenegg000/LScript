@@ -1,11 +1,14 @@
 package org.goldenegg.LScript;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.goldenegg.LScript.LSErrors.*;
 import org.goldenegg.LScript.LSParser.ASTNode;
 import org.goldenegg.LScript.Types.LFunction;
+import org.goldenegg.LScript.Types.LNull;
+import org.goldenegg.LScript.Types.LObject;
 import org.goldenegg.LScript.Types.LString;
 import org.goldenegg.LScript.Types.LVariable;
 
@@ -161,5 +164,29 @@ public class LSInterpreter {
 
     public void setGlobalVariable(String name, LSValue value) {
         globalVariables.put(name, value);
+    }
+
+    // LScript std Implementation
+    protected LFunction print = new LFunction(arg -> {
+        if (arg.get("val") instanceof LString)
+            try {
+                var out = arg.get("val").toType(LString.class).getString();
+                if (out == null)
+                    return new LNull();
+                out = out.replace("\\n", "\n");
+                out = out.replace("\\t", "\t");
+                out = out.replace("\\s", "\s");
+                System.out.println(out);
+            } catch (LSError f) {
+                f.printStackTrace();
+            }
+        else
+            System.out.println(arg.get("val"));
+        return new LNull();
+    }, new ArrayList<>(Arrays.asList(new String[] { "val" })));
+
+    protected LObject std = new LObject();
+    {
+        std.children.put("print", print);
     }
 }
