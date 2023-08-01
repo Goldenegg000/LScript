@@ -1,6 +1,6 @@
 import <std>;
 
-std.print("Hello world!\nthis is on a new line!!!! :O");
+std.print("Hello world!\nthis is on a new\sline!!!!\t:O");
 
 function setup(test) then
     pog = test;

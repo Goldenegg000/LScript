@@ -173,9 +173,6 @@ public class LSInterpreter {
                 var out = arg.get("val").toType(LString.class).getString();
                 if (out == null)
                     return new LNull();
-                out = out.replace("\\n", "\n");
-                out = out.replace("\\t", "\t");
-                out = out.replace("\\s", "\s");
                 System.out.println(out);
             } catch (LSError f) {
                 f.printStackTrace();

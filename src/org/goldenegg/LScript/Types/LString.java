@@ -11,6 +11,9 @@ public class LString extends LSValue {
     private String Value;
 
     public LString(String string) {
+        string = string.replace("\\n", "\n");
+        string = string.replace("\\t", "\t");
+        string = string.replace("\\s", "\s");
         Value = string;
     }
 
