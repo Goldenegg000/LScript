@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.goldenegg.LScript.LSErrors.*;
 import org.goldenegg.LScript.LSParser.ASTNode;
+import org.goldenegg.LScript.Types.LBoolean;
 import org.goldenegg.LScript.Types.LFunction;
 import org.goldenegg.LScript.Types.LNull;
 import org.goldenegg.LScript.Types.LObject;
@@ -92,6 +93,9 @@ public class LSInterpreter {
                 LSValue val = null;
 
                 val = LString.toValue(item.val);
+                if (val == null)
+                    val = LBoolean.toValue(item.val);
+
                 if (val == null) {
                     val = LVariable.toValue(item.val);
                     if (val != null)
@@ -101,8 +105,12 @@ public class LSInterpreter {
                 if (val != null)
                     if (isGlobal)
                         globals.put(item.name, val);
-                    else
-                        locals.put(item.name, val);
+                    else {
+                        if (globals.containsKey(item.name)) {
+                            globals.put(item.name, val);
+                        } else
+                            locals.put(item.name, val);
+                    }
                 else
                     throw new LSErrors.InvalidEndOfStatementException("could not get the value from: " + item.val);
             }
@@ -136,6 +144,26 @@ public class LSInterpreter {
                 }
 
                 val.toType(LFunction.class).call(valuedArgs, this);
+            }
+
+            else if (itm instanceof LSParser.IfBlock) {
+                var item = itm.castToType(LSParser.IfBlock.class);
+
+                // System.out.println(item);
+
+                if (item.statement instanceof LVariable) {
+                    item.statement = item.statement.toType(LVariable.class).getValueFromVariable(globals, locals);
+                }
+
+                if (item.statement == null)
+                    throw new ValueIsNull(item.toString());
+
+                // System.out.println(item.statement.getType().getString());
+                if (item.statement.getType().getString().equals("Boolean")) {
+                    // System.out.println(item.statement);
+                    if (item.statement.getValue(Boolean.class))
+                        this.runCode(item.code, globals, locals, false);
+                }
             }
 
             else {

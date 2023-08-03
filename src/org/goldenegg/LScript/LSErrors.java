@@ -86,4 +86,14 @@ public class LSErrors {
             super(msg);
         }
     };
+
+    public static class ValueIsNull extends LSError {
+        public ValueIsNull() {
+            super("");
+        }
+
+        public ValueIsNull(String msg) {
+            super(msg);
+        }
+    };
 }

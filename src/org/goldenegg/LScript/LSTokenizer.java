@@ -35,7 +35,7 @@ public class LSTokenizer {
             getChildToken,
             endOfStatement,
             Nothing,
-            EOF;
+            EOF, booleanStatement;
         }
 
         private TokenEnum token;
@@ -98,15 +98,17 @@ public class LSTokenizer {
         String typePattern = "\\s*<[a-zA-Z_][a-zA-Z_0-9]*>\\s*"; // gets a type
         String operatorPattern = "\\s*==\\s*|\\s*<=\\s*|\\s*>=\\s*|\\s*<\\s*|\\s*>\\s*|\\s*=\\s*"; // Matches
                                                                                                    // the any
+        String booleanPattern = "\\s*true\\s*|\\s*false\\s*";
         // operator
 
         // Combine all patterns into a single regex
         String combinedPattern = String.join("|", importPattern, functionPattern, ifPattern, elsePattern,
                 curlyBracketOpenPattern, curlyBracketClosePattern, codeBlockOpenPattern,
                 codeBlockClosePattern, intPattern, stringPattern, typePattern, separatorPattern,
-                endOfStatementPattern, bracketsPattern, operatorPattern, namePattern, "\s+", "\t+", "\n+", "."); // which
-                                                                                                                 // is
-                                                                                                                 // BIG
+                endOfStatementPattern, bracketsPattern, operatorPattern, booleanPattern, namePattern, "\s+", "\t+",
+                "\n+", "."); // which
+        // is
+        // BIG
 
         // Create the regex pattern and get a matcher
         Pattern pattern = Pattern.compile(combinedPattern);
@@ -130,6 +132,12 @@ public class LSTokenizer {
                     break;
                 case "if":
                     token = TokenEnum.ifStatement;
+                    break;
+                case "true":
+                    token = TokenEnum.booleanStatement;
+                    break;
+                case "false":
+                    token = TokenEnum.booleanStatement;
                     break;
                 case "else":
                     token = TokenEnum.elseStatement;

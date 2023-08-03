@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.goldenegg.LScript.LSErrors.*;
 import org.goldenegg.LScript.LSTokenizer.Token;
 import org.goldenegg.LScript.LSTokenizer.Token.TokenEnum;
+import org.goldenegg.LScript.Types.LBoolean;
 import org.goldenegg.LScript.Types.LString;
 import org.goldenegg.LScript.Types.LVariable;
 
@@ -60,8 +61,7 @@ public class LSParser {
                     i++;
                 }
 
-                // i++;
-                System.out.println(tokens.get(i));
+                // System.out.println(tokens);
                 tree.add(new IfBlock(cod.get(0), parse(code)));
                 continue;
             }
@@ -144,7 +144,9 @@ public class LSParser {
             // 1)));
             // }
             currentVal = LString.toValue(token);
-
+            if (token.getToken() == TokenEnum.booleanStatement) {
+                currentVal = new LBoolean(token.getValue().equals("true"));
+            }
             if (token.getToken() == TokenEnum.name) {
                 currentVal = new LVariable(token.getValue());
             }
