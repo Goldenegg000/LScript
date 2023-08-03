@@ -4,6 +4,9 @@ std.print("Hello world!\nthis is on a new\sline!!!!\t:O");
 
 function setup(test) then
     pog = test;
+    if (true) then
+        pog = "sheesh";
+    end
     std.print(pog);
 end
 

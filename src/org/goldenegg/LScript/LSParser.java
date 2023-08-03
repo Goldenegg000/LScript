@@ -38,6 +38,34 @@ public class LSParser {
                 tree.add(new CallFunction(name, cod));
             }
 
+            else if (node.getToken() == TokenEnum.ifStatement
+                    && tokens.get(i + 1).getToken() == TokenEnum.openingParen) {
+                var cod = new ArrayList<LSValue>();
+                i += 2;
+                i = getExpression(tokens, i, cod);
+
+                i++;
+                if (tokens.get(i).getToken() != TokenEnum.codeBlockOpen)
+                    throw new InvalidTokenException("missing 'then' : " + i);
+
+                i++;
+                var code = new ArrayList<Token>();
+                var ignore = 0;
+                while (tokens.get(i).getToken() != TokenEnum.codeBlockClose || ignore != 0) {
+                    code.add(tokens.get(i));
+                    if (tokens.get(i).getToken() == TokenEnum.codeBlockOpen)
+                        ignore++;
+                    if (tokens.get(i).getToken() == TokenEnum.codeBlockClose)
+                        ignore--;
+                    i++;
+                }
+
+                // i++;
+                System.out.println(tokens.get(i));
+                tree.add(new IfBlock(cod.get(0), parse(code)));
+                continue;
+            }
+
             else if (node.getToken() == TokenEnum.name && tokens.get(i + 1).getToken() == TokenEnum.setOperator) {
                 tree.add(new setVariable(node.getValue(), tokens.get(i + 2)));
                 i += 2;
@@ -188,6 +216,20 @@ public class LSParser {
 
         public String toString() {
             return "callFunction: name::" + name + ", args::" + args;
+        }
+    }
+
+    public static class IfBlock extends ASTNode {
+        public LSValue statement;
+        public ArrayList<ASTNode> code;
+
+        public IfBlock(LSValue condition, ArrayList<ASTNode> code) {
+            this.statement = condition;
+            this.code = code;
+        }
+
+        public String toString() {
+            return "IfBlock: statement::" + statement + ", code::" + code;
         }
     }
 }
