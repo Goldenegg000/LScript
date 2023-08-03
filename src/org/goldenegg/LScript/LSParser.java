@@ -33,32 +33,8 @@ public class LSParser {
             else if (node.getToken() == TokenEnum.name && tokens.get(i + 1).getToken() == TokenEnum.openingParen) {
                 var cod = new ArrayList<LSValue>();
                 var name = node.getValue();
-                var ignore = 0;
                 i += 2;
-                while (tokens.get(i).getToken() != TokenEnum.closingParen || ignore != 0) {
-                    var token = tokens.get(i);
-                    LSValue currentVal = null;
-                    // if (token.getToken() == TokenEnum.stringToken) {
-                    // cod.add(new LString(token.getValue().substring(1, token.getValue().length() -
-                    // 1)));
-                    // }
-                    currentVal = LString.toValue(token);
-
-                    if (token.getToken() == TokenEnum.name) {
-                        currentVal = new LVariable(token.getValue());
-                    }
-
-                    if (currentVal != null)
-                        cod.add(currentVal);
-                    else
-                        throw new InvalidOperationException("could not get current value type");
-
-                    if (tokens.get(i).getToken() == TokenEnum.openingParen)
-                        ignore++;
-                    if (tokens.get(i).getToken() == TokenEnum.closingParen)
-                        ignore--;
-                    i++;
-                }
+                i = getExpression(tokens, i, cod);
                 tree.add(new CallFunction(name, cod));
             }
 
@@ -127,6 +103,36 @@ public class LSParser {
                 i++;
         }
         return tree;
+    }
+
+    private static int getExpression(ArrayList<Token> tokens, int i, ArrayList<LSValue> cod)
+            throws LSError, InvalidOperationException {
+        var ignore = 0;
+        while (tokens.get(i).getToken() != TokenEnum.closingParen || ignore != 0) {
+            var token = tokens.get(i);
+            LSValue currentVal = null;
+            // if (token.getToken() == TokenEnum.stringToken) {
+            // cod.add(new LString(token.getValue().substring(1, token.getValue().length() -
+            // 1)));
+            // }
+            currentVal = LString.toValue(token);
+
+            if (token.getToken() == TokenEnum.name) {
+                currentVal = new LVariable(token.getValue());
+            }
+
+            if (currentVal != null)
+                cod.add(currentVal);
+            else
+                throw new InvalidOperationException("could not get current value type");
+
+            if (tokens.get(i).getToken() == TokenEnum.openingParen)
+                ignore++;
+            if (tokens.get(i).getToken() == TokenEnum.closingParen)
+                ignore--;
+            i++;
+        }
+        return i;
     }
 
     public static class Import extends ASTNode {
