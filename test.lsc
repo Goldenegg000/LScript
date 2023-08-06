@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import <std>; -- import the standard library
+=======
+import <std>; -- import the standart library
+>>>>>>> 18604d3983c009cd95e029707c3228587a52d65d
 
 std.print("Hello world!\nthis is on a new\sline!!!!\t:O");
 
