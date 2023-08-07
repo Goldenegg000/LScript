@@ -151,17 +151,19 @@ public class LSInterpreter {
 
                 // System.out.println(item);
 
+                LSValue val = null;
+
                 if (item.statement instanceof LVariable) {
-                    item.statement = item.statement.toType(LVariable.class).getValueFromVariable(globals, locals);
+                    val = item.statement.toType(LVariable.class).getValueFromVariable(globals, locals);
                 }
 
-                if (item.statement == null)
+                if (val == null)
                     throw new ValueIsNull(item.toString());
 
                 // System.out.println(item.statement.getType().getString());
-                if (item.statement.getType().getString().equals("Boolean")) {
+                if (val.getType().getString().equals("Boolean")) {
                     // System.out.println(item.statement);
-                    if (item.statement.getValue(Boolean.class))
+                    if (val.getValue(Boolean.class))
                         this.runCode(item.code, globals, locals, false);
                 }
             }
