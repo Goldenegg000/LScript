@@ -35,7 +35,8 @@ public class LSTokenizer {
             getChildToken,
             endOfStatement,
             Nothing,
-            EOF, booleanStatement;
+            EOF,
+            booleanStatement;
         }
 
         private TokenEnum token;

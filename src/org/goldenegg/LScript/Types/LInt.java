@@ -22,26 +22,6 @@ public class LInt extends LSValue {
     }
 
     @Override
-    public LInt addValue(LSValue value) throws LSError {
-        return new LInt(Value + value.getValue(Integer.class));
-    }
-
-    @Override
-    public LInt subtractValue(LSValue value) throws LSError {
-        return new LInt(Value - value.getValue(Integer.class));
-    }
-
-    @Override
-    public LInt multiplyValue(LSValue value) throws LSError {
-        return new LInt(Value * value.getValue(Integer.class));
-    }
-
-    @Override
-    public LInt divideValue(LSValue value) throws LSError {
-        return new LInt(Value / value.getValue(Integer.class));
-    }
-
-    @Override
     public LString getType() {
         return new LString("Integer");
     }

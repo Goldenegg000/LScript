@@ -1,10 +1,10 @@
 import <std>; -- import the standard library
 
 std.print("Hello world!\nthis is on a new\sline!!!!\t:O");
+funny = true;
 
 function setup(test) then
     pog = test;
-    funny = true;
     if (funny) then
         std.print("test");
     end

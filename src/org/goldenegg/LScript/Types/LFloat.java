@@ -22,26 +22,6 @@ public class LFloat extends LSValue {
     }
 
     @Override
-    public LFloat addValue(LSValue value) throws LSError {
-        return new LFloat(Value + value.getValue(Float.class));
-    }
-
-    @Override
-    public LFloat subtractValue(LSValue value) throws LSError {
-        return new LFloat(Value - value.getValue(Float.class));
-    }
-
-    @Override
-    public LFloat multiplyValue(LSValue value) throws LSError {
-        return new LFloat(Value * value.getValue(Float.class));
-    }
-
-    @Override
-    public LSValue divideValue(LSValue value) throws LSError {
-        return new LFloat(Value / value.getValue(Float.class));
-    }
-
-    @Override
     public LString getType() {
         return new LString("Float");
     }

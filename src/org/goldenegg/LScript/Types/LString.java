@@ -26,14 +26,6 @@ public class LString extends LSValue {
     }
 
     @Override
-    public LString addValue(LSValue value) throws LSError {
-        var val = value.<String>getValue(String.class);
-        if (val instanceof String)
-            return new LString(Value + (String) val);
-        throw new InvalidTypeException();
-    }
-
-    @Override
     public LString getType() {
         return new LString("String");
     }

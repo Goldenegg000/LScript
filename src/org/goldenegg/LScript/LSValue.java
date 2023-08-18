@@ -16,23 +16,6 @@ public class LSValue {
     public void setValue(LSValue value) throws LSError {
     };
 
-    public LSValue addValue(LSValue value) throws LSError {
-        throw new InvalidOperationException();
-    };
-
-    public LSValue subtractValue(LSValue value) throws LSError {
-        throw new InvalidOperationException();
-    };
-
-    public LSValue multiplyValue(LSValue value) throws LSError {
-        throw new InvalidOperationException();
-    };
-
-    public LSValue divideValue(LSValue value) throws LSError {
-        throw new InvalidOperationException();
-
-    };
-
     public LSValue call(ArrayList<LSValue> val, LSInterpreter self) throws LSError {
         throw new InvalidOperationException();
     };
