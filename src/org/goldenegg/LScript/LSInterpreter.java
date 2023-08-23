@@ -29,49 +29,37 @@ public class LSInterpreter {
         }
     }
 
-    private Scope globalVariables = new Scope();
+    public ArrayList<Scope> globalVariables = new ArrayList<Scope>();
 
     public void compile(String code) throws LSError { // runs global code
-        var tmp = new ArrayList<Scope>();
-        tmp.add(globalVariables);
-        runCode(code, tmp, true);
+        runCode(code, true);
     }
 
     public void compile(String code, Scope locals) throws LSError { // runs global code
-        var tmp = new ArrayList<Scope>();
-        tmp.add(globalVariables);
-        tmp.add(locals);
-        runCode(code, tmp, true);
+        globalVariables.add(locals);
+        runCode(code, true);
     }
 
     public LSValue runCode(String code, Scope locals) throws LSError { // runs function
-        var tmp = new ArrayList<Scope>();
-        tmp.add(globalVariables);
-        tmp.add(locals);
-        return runCode(code, tmp, false);
+        globalVariables.add(locals);
+        return runCode(code, false);
     }
 
     public void compile(ArrayList<ASTNode> code) throws LSError { // runs global code
-        var tmp = new ArrayList<Scope>();
-        tmp.add(globalVariables);
-        runCode(code, tmp, true);
+        runCode(code, true);
     }
 
     public void compile(ArrayList<ASTNode> code, HashMap<String, LSValue> locals) throws LSError { // runs global code
-        var tmp = new ArrayList<Scope>();
-        tmp.add(globalVariables);
-        tmp.add(new Scope(locals));
-        runCode(code, tmp, true);
+        globalVariables.add(new Scope(locals));
+        runCode(code, true);
     }
 
     public LSValue runCode(ArrayList<ASTNode> code, HashMap<String, LSValue> locals) throws LSError { // runs function
-        var tmp = new ArrayList<Scope>();
-        tmp.add(globalVariables);
-        tmp.add(new Scope(locals));
-        return runCode(code, tmp, false);
+        globalVariables.add(new Scope(locals));
+        return runCode(code, false);
     }
 
-    private LSValue runCode(String code, ArrayList<Scope> scopes,
+    private LSValue runCode(String code,
             boolean isGlobal)
             throws LSError {
         var tokens = LSTokenizer.tokenize(code);
@@ -90,10 +78,11 @@ public class LSInterpreter {
         // System.out.println(astNode);
         // }
 
-        return runCode(tree, scopes, isGlobal);
+        globalVariables.add(new Scope());
+        return runCode(tree, isGlobal);
     }
 
-    private LSValue runCode(ArrayList<ASTNode> code, ArrayList<Scope> scopes,
+    private LSValue runCode(ArrayList<ASTNode> code,
             boolean isGlobal)
             throws LSError {
         for (var itm : code) {
@@ -103,7 +92,7 @@ public class LSInterpreter {
                 var val = getImport(item.name);
                 if (val == null)
                     throw new ImportNotFoundException();
-                setValueFromScope(item.name, val, scopes);
+                setValueFromScopes(item.name, val, globalVariables);
                 // if (isGlobal)
                 // globals.put(item.name, val);
                 // else
@@ -114,7 +103,7 @@ public class LSInterpreter {
                 var item = itm.castToType(LSParser.CreateFunction.class);
 
                 var val = new LFunction(item.code, item.args);
-                setValueFromScope(item.name, val, scopes);
+                setValueFromScopes(item.name, val, globalVariables);
                 // if (isGlobal)
                 // globals.put(item.name, val);
                 // else
@@ -123,19 +112,12 @@ public class LSInterpreter {
 
             else if (itm instanceof LSParser.setVariable) {
                 var item = itm.castToType(LSParser.setVariable.class);
-                LSValue val = null;
-
-                val = LString.toValue(item.val);
-                if (val == null)
-                    val = LBoolean.toValue(item.val);
-
-                if (val == null) {
-                    val = LVariable.toValue(item.val);
-                    if (val != null)
-                        val = val.toType(LVariable.class).getValueFromVariable(scopes);
+                LSValue val = item.val;
+                if (val instanceof LVariable) {
+                    val = val.toType(LVariable.class).getValueFromVariable(globalVariables);
                 }
 
-                getLocalScope(scopes).put(item.name, val);
+                getLocalScope(globalVariables).put(item.name, item.val);
                 // if (val != null)
                 // if (isGlobal)
                 // globals.put(item.name, val);
@@ -155,7 +137,7 @@ public class LSInterpreter {
 
                 var thing = item.name.split("\\.");
 
-                var val = getValueFromScope(thing[0], scopes);
+                var val = getValueFromScopes(thing[0], globalVariables);
                 // System.out.println(item.args);
 
                 if (val == null)
@@ -172,11 +154,13 @@ public class LSInterpreter {
                 for (int i = 0; i < valuedArgs.size(); i++) {
                     if (valuedArgs.get(i) instanceof LVariable) {
                         valuedArgs.set(i,
-                                valuedArgs.get(i).toType(LVariable.class).getValueFromVariable(scopes));
+                                valuedArgs.get(i).toType(LVariable.class).getValueFromVariable(globalVariables));
                     }
                 }
 
+                globalVariables.add(new Scope());
                 val.toType(LFunction.class).call(valuedArgs, this);
+                globalVariables.remove(globalVariables.size() - 1);
             }
 
             else if (itm instanceof LSParser.IfBlock) {
@@ -187,7 +171,7 @@ public class LSInterpreter {
                 LSValue val = null;
 
                 if (item.statement instanceof LVariable) {
-                    val = item.statement.toType(LVariable.class).getValueFromVariable(scopes);
+                    val = item.statement.toType(LVariable.class).getValueFromVariable(globalVariables);
                 }
 
                 if (val == null)
@@ -197,9 +181,9 @@ public class LSInterpreter {
                 if (val.getType().getString().equals("Boolean")) {
                     // System.out.println(item.statement);
                     if (val.getValue(Boolean.class)) {
-                        scopes.add(new Scope());
-                        this.runCode(item.code, scopes, false);
-                        scopes.remove(scopes.size() - 1);
+                        globalVariables.add(new Scope());
+                        this.runCode(item.code, false);
+                        globalVariables.remove(globalVariables.size() - 1);
                     }
                 }
             }
@@ -208,8 +192,6 @@ public class LSInterpreter {
                 throw new InvalidOperationException("not implemented: " + itm);
             }
         }
-
-        globalVariables = scopes.get(0);
 
         // for (Scope scope : scopes) {
         // System.out.println(scope);
@@ -222,19 +204,19 @@ public class LSInterpreter {
         return null;
     }
 
-    public LSValue getGlobalVariable(String name) {
-        return globalVariables.get(name);
+    public LSValue getScopeVariable(Scope scope, String name) {
+        return scope.get(name);
     }
 
     public String globalVariablesToString() {
         return globalVariables.toString();
     }
 
-    public void setGlobalVariable(String name, LSValue value) {
-        globalVariables.put(name, value);
+    public void setScopeVariable(Scope scope, String name, LSValue value) {
+        scope.put(name, value);
     }
 
-    public static LSValue getValueFromScope(String name, ArrayList<Scope> scopes) {
+    public static LSValue getValueFromScopes(String name, ArrayList<Scope> scopes) {
         var reversedList = new ArrayList<>(scopes);
         Collections.reverse(reversedList);
         for (Scope scope : reversedList) {
@@ -245,7 +227,7 @@ public class LSInterpreter {
         return null;
     }
 
-    public static void setValueFromScope(String name, LSValue val, ArrayList<Scope> scopes) {
+    public static void setValueFromScopes(String name, LSValue val, ArrayList<Scope> scopes) {
         var reversedList = new ArrayList<>(scopes);
         Collections.reverse(reversedList);
         for (Scope scope : reversedList) {
@@ -257,13 +239,35 @@ public class LSInterpreter {
         getLocalScope(scopes).put(name, val);
     }
 
+    public LSValue getVariable(String name) {
+        return getValueFromScopes(name, this.globalVariables);
+    }
+
+    public void setVariable(String name, LSValue val) {
+        setValueFromScopes(name, val, this.globalVariables);
+    }
+
     public static Scope getLocalScope(ArrayList<Scope> scopes) {
+        if (scopes.size() < 1)
+            return null;
         return scopes.get(scopes.size() - 1);
     }
 
+    public static Scope getGlobalScope(ArrayList<Scope> scopes) {
+        return scopes.get(0);
+    }
+
     // LScript std Implementation
-    protected LFunction print = new LFunction(arg -> {
-        if (arg.get("val") instanceof LString)
+    protected LFunction print = new LFunction(params -> {
+        var arg = params.args;
+        if (arg.get("val") instanceof LVariable) {
+            try {
+                arg.put("val", arg.get("val").toType(LVariable.class).getValueFromVariable(params.scopes));
+            } catch (LSError e) {
+                e.printStackTrace();
+            }
+        }
+        if (arg.get("val") instanceof LString) {
             try {
                 var out = arg.get("val").toType(LString.class).getString();
                 if (out == null)
@@ -272,8 +276,8 @@ public class LSInterpreter {
             } catch (LSError f) {
                 f.printStackTrace();
             }
-        else
-            System.out.println(arg.get("val"));
+        } else
+            System.out.println("INVALID: " + arg.get("val"));
         return new LNull();
     }, new ArrayList<>(Arrays.asList(new String[] { "val" })));
 

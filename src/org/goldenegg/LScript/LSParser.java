@@ -47,7 +47,7 @@ public class LSParser {
 
                 i++;
                 if (tokens.get(i).getToken() != TokenEnum.codeBlockOpen)
-                    throw new InvalidTokenException("missing 'then' : " + i);
+                    throw new InvalidTokenException("missing OpenBlockOperator : " + node.LineNumber);
 
                 i++;
                 var code = new ArrayList<Token>();
@@ -67,7 +67,7 @@ public class LSParser {
             }
 
             else if (node.getToken() == TokenEnum.name && tokens.get(i + 1).getToken() == TokenEnum.setOperator) {
-                tree.add(new setVariable(node.getValue(), tokens.get(i + 2)));
+                tree.add(new setVariable(node.getValue(), toLSVal(tokens.get(i + 2))));
                 i += 2;
             }
 
@@ -91,13 +91,13 @@ public class LSParser {
                                     break;
                                 } else {
                                     throw new InvalidTokenException(
-                                            name.toString() + " : " + i);
+                                            name.toString() + " : " + node.LineNumber);
                                 }
                         }
 
                         i++;
                         if (tokens.get(i).getToken() != TokenEnum.codeBlockOpen)
-                            throw new InvalidTokenException("missing 'then' : " + i);
+                            throw new InvalidTokenException("missing OpenBlockOperator : " + node.LineNumber);
 
                         i++;
                         var cod = new ArrayList<Token>();
@@ -119,8 +119,10 @@ public class LSParser {
             else if (node.getToken() == TokenEnum.EOF)
                 break;
 
-            else {
-                throw new InvalidTokenException(node.toString() + " : " + i);
+            else if (node.getToken() == TokenEnum.endOfStatement) {
+                continue;
+            } else {
+                throw new InvalidTokenException(node.toString() + " : " + node.LineNumber);
             }
 
             if (tokens.size() <= i + 1)
@@ -133,28 +135,30 @@ public class LSParser {
         return tree;
     }
 
+    private static LSValue toLSVal(Token token) throws LSError {
+        var currentVal = LString.toValue(token);
+        if (token.getToken() == TokenEnum.booleanStatement) {
+            currentVal = new LBoolean(token.getValue().equals("true"));
+        }
+        if (token.getToken() == TokenEnum.name) {
+            currentVal = new LVariable(token.getValue());
+        }
+
+        if (currentVal != null)
+            return currentVal;
+        else
+            throw new InvalidOperationException("could not get current value type");
+    }
+
     private static int getExpression(ArrayList<Token> tokens, int i, ArrayList<LSValue> cod)
             throws LSError, InvalidOperationException {
         var ignore = 0;
         while (tokens.get(i).getToken() != TokenEnum.closingParen || ignore != 0) {
             var token = tokens.get(i);
-            LSValue currentVal = null;
-            // if (token.getToken() == TokenEnum.stringToken) {
-            // cod.add(new LString(token.getValue().substring(1, token.getValue().length() -
-            // 1)));
-            // }
-            currentVal = LString.toValue(token);
-            if (token.getToken() == TokenEnum.booleanStatement) {
-                currentVal = new LBoolean(token.getValue().equals("true"));
-            }
-            if (token.getToken() == TokenEnum.name) {
-                currentVal = new LVariable(token.getValue());
-            }
 
-            if (currentVal != null)
-                cod.add(currentVal);
-            else
-                throw new InvalidOperationException("could not get current value type");
+            var currentVal = toLSVal(token);
+
+            cod.add(currentVal);
 
             if (tokens.get(i).getToken() == TokenEnum.openingParen)
                 ignore++;
@@ -173,21 +177,21 @@ public class LSParser {
         }
 
         public String toString() {
-            return "import: " + name;
+            return "import(" + name + ")";
         }
     }
 
     public static class setVariable extends ASTNode {
         public String name;
-        public Token val;
+        public LSValue val;
 
-        public setVariable(String name, Token val) {
+        public setVariable(String name, LSValue val) {
             this.name = name;
             this.val = val;
         }
 
         public String toString() {
-            return "setVar: " + name;
+            return "setVar(" + name + ", " + val + ")";
         }
     }
 
@@ -203,7 +207,7 @@ public class LSParser {
         }
 
         public String toString() {
-            return "createFunction: name::" + name + ", args::" + args + ", code::" + code;
+            return "createFunction(name=" + name + ", args=" + args + ", code=" + code + ")";
         }
     }
 
@@ -217,7 +221,7 @@ public class LSParser {
         }
 
         public String toString() {
-            return "callFunction: name::" + name + ", args::" + args;
+            return "callFunction(name=" + name + ", args=" + args + ")";
         }
     }
 
@@ -231,7 +235,7 @@ public class LSParser {
         }
 
         public String toString() {
-            return "IfBlock: statement::" + statement + ", code::" + code;
+            return "IfBlock(statement=" + statement + ", code=" + code + ")";
         }
     }
 }

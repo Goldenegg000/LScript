@@ -29,7 +29,7 @@ public class App {
 
         inter.compile(code);
 
-        var main = inter.getGlobalVariable("setup");
+        var main = inter.getVariable("setup");
         if (main != null)
             if (main.getType().getString() == "Function") {
                 var funcArgs = new ArrayList<LSValue>();

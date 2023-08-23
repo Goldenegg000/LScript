@@ -11,11 +11,22 @@ import org.goldenegg.LScript.LSErrors.InvalidArgumentLengthException;
 import org.goldenegg.LScript.LSErrors.InvalidOperationException;
 import org.goldenegg.LScript.LSErrors.InvalidTypeException;
 import org.goldenegg.LScript.LSErrors.LSError;
+import org.goldenegg.LScript.LSInterpreter.Scope;
 
 public class LFunction extends LSValue {
 
+    public static class FunctionParams {
+        public HashMap<String, LSValue> args;
+        public ArrayList<Scope> scopes;
+
+        public FunctionParams(HashMap<String, LSValue> args, ArrayList<Scope> scopes) {
+            this.args = args;
+            this.scopes = scopes;
+        }
+    }
+
     private ArrayList<ASTNode> code;
-    private Function<HashMap<String, LSValue>, LSValue> altValue;
+    private Function<FunctionParams, LSValue> altValue;
 
     private ArrayList<String> functionParameterNames;
 
@@ -25,7 +36,7 @@ public class LFunction extends LSValue {
         functionParameterNames = names;
     }
 
-    public LFunction(Function<HashMap<String, LSValue>, LSValue> code, ArrayList<String> names) {
+    public LFunction(Function<FunctionParams, LSValue> code, ArrayList<String> names) {
         this.code = null;
         altValue = code;
         functionParameterNames = names;
@@ -56,7 +67,7 @@ public class LFunction extends LSValue {
             return self.runCode(code, out);
         }
         if (altValue != null) {
-            return altValue.apply(out);
+            return altValue.apply(new FunctionParams(out, self.globalVariables));
         }
         throw new InvalidOperationException();
     }

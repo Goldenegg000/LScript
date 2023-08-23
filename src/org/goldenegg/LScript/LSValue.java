@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import org.goldenegg.LScript.LSErrors.*;
+import org.goldenegg.LScript.LSInterpreter.Scope;
 import org.goldenegg.LScript.LSTokenizer.Token;
 import org.goldenegg.LScript.LSTokenizer.Token.TokenEnum;
 import org.goldenegg.LScript.Types.LString;

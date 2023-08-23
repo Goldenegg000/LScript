@@ -1,7 +1,7 @@
-import <std>; -- import the standard library
+import <std>; -- try to import the standard library
 
 std.print("Hello world!\nthis is on a new\sline!!!!\t:O");
-funny = true;
+funny = false;
 
 function setup(test) then
     pog = test;

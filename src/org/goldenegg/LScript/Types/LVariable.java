@@ -19,7 +19,7 @@ public class LVariable extends LSValue {
     }
 
     public LSValue getValueFromVariable(ArrayList<Scope> scopes) {
-        return LSInterpreter.getValueFromScope(name, scopes);
+        return LSInterpreter.getValueFromScopes(name, scopes);
         // return local.get(name) != null ? local.get(name) : scopes.get(name);
     }
 
@@ -35,6 +35,6 @@ public class LVariable extends LSValue {
     }
 
     public String toString() {
-        return "Variable: " + name;
+        return "Variable(" + name + ")";
     }
 }

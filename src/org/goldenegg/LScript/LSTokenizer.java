@@ -211,7 +211,7 @@ public class LSTokenizer {
             }
             if (token == null) // if no token is matched throw an error
                 throw new InvalidTokenException(
-                        "token: " + matchedToken + " at line " + getLine(code, matcher.start()) + " is invalid");
+                        "token: " + matchedToken + " at line " + (getLine(code, matcher.start())) + " is invalid");
             if (token == TokenEnum.Nothing)
                 continue;
             var TheToken = new Token();
@@ -232,10 +232,10 @@ public class LSTokenizer {
         int line = 1;
         Pattern pattern = Pattern.compile("\n");
         Matcher matcher = pattern.matcher(data);
-        matcher.region(0, start);
+        matcher.region(0, start + 1);
         while (matcher.find()) {
             line++;
         }
-        return (line);
+        return (line + 1);
     }
 }
